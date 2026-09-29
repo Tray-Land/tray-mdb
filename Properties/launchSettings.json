@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "TrayMDB (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "TrayMDB (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
