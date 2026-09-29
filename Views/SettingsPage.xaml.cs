@@ -1,28 +1,31 @@
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
 using TrayMDB.Services;
 using Windows.ApplicationModel;
-using WinUIEx;
 
 namespace TrayMDB.Views;
 
-public sealed partial class SettingsWindow : WindowEx
+/// <summary>Settings, shown inside the flyout in place of <see cref="FlyoutPage"/>.</summary>
+public sealed partial class SettingsPage : Page
 {
+    private readonly Action _goBack;
     private bool _loading = true;
 
-    public SettingsWindow()
+    public SettingsPage(Action goBack)
     {
         InitializeComponent();
-        Title = $"{App.DisplayName} Settings";
-        AppTitleBar.Title = Title;
-        ExtendsContentIntoTitleBar = true;
-        SetTitleBar(AppTitleBar);
-        AppWindow.SetIcon(Path.Combine(AppContext.BaseDirectory, "Assets", "AppIcon.ico"));
-        WindowPlacementService.CenterOnPrimary(this, 480, 560);
-
+        _goBack = goBack;
         VersionText.Text = $"{App.DisplayName} {GetVersion()}";
-        _ = LoadStartupStateAsync();
-        _loading = false;
     }
+
+    /// <summary>Re-reads state that can change behind the app's back (Windows startup settings).</summary>
+    public void OnShown()
+    {
+        _ = LoadStartupStateAsync();
+        BackButton.Focus(FocusState.Programmatic);
+    }
+
+    private void BackButton_Click(object sender, RoutedEventArgs e) => _goBack();
 
     private static string GetVersion()
     {

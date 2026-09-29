@@ -6,10 +6,23 @@
     xmlns:ex="using:WinUIEx"
     Title="Tray MDB">
 
-    <Grid x:Name="PopupRoot" KeyboardAcceleratorPlacementMode="Hidden">
+    <Grid
+        x:Name="PopupRoot"
+        KeyboardAcceleratorPlacementMode="Hidden"
+        PointerPressed="PopupRoot_PointerPressed">
         <Grid.KeyboardAccelerators>
             <KeyboardAccelerator Key="Escape" Invoked="Escape_Invoked" />
+            <KeyboardAccelerator
+                Key="Left"
+                Invoked="Back_Invoked"
+                Modifiers="Menu" />
         </Grid.KeyboardAccelerators>
-        <ContentPresenter x:Name="PageHost" />
+        <ContentPresenter x:Name="PageHost">
+            <ContentPresenter.ContentTransitions>
+                <TransitionCollection>
+                    <ContentThemeTransition HorizontalOffset="24" />
+                </TransitionCollection>
+            </ContentPresenter.ContentTransitions>
+        </ContentPresenter>
     </Grid>
 </ex:WindowEx>
