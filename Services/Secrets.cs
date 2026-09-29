@@ -10,10 +10,13 @@ namespace TrayMDB.Services;
 /// </summary>
 internal static class Secrets
 {
-    private static readonly Lazy<string?> s_exampleApiKey = new(() => GetOAuthString("ExampleApiKey"));
+    private static readonly Lazy<string?> s_tmdbApiKey = new(() => GetOAuthString("TmdbApiKey"));
 
-    /// <summary>The example service's API key, or null when OAuth.resw doesn't provide one.</summary>
-    public static string? ExampleApiKey => s_exampleApiKey.Value;
+    /// <summary>
+    /// The built-in TMDB credential (a v4 read access token or a v3 API key), or null when OAuth.resw
+    /// doesn't provide one.
+    /// </summary>
+    public static string? TmdbApiKey => s_tmdbApiKey.Value;
 
     private static string? GetOAuthString(string name)
     {

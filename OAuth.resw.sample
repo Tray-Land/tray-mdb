@@ -37,8 +37,8 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="ExampleApiKey" xml:space="preserve">
+  <data name="TmdbApiKey" xml:space="preserve">
     <value></value>
-    <comment>Example key read by Secrets.ExampleApiKey. Rename it, and add one data element per key.</comment>
+    <comment>TMDB credential, read by Secrets.TmdbApiKey. Paste the API Read Access Token (preferred) or the API Key from https://www.themoviedb.org/settings/api.</comment>
   </data>
 </root>
