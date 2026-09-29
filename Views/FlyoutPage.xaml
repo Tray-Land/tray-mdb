@@ -3,89 +3,599 @@
     x:Class="TrayMDB.Views.FlyoutPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:TrayMDB.Views"
+    xmlns:tmdb="using:TrayMDB.Tmdb"
     Background="Transparent">
 
-    <Grid Padding="16,12,12,16" RowSpacing="12">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
+    <Page.Resources>
+        <DataTemplate x:Key="ResultTemplate" x:DataType="tmdb:TmdbSearchItem">
+            <Grid Padding="0,6" ColumnSpacing="12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="46" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Border
+                    Width="46"
+                    Height="69"
+                    Background="{ThemeResource ControlAltFillColorTertiaryBrush}"
+                    CornerRadius="4">
+                    <Grid>
+                        <!--  Shows through until the image loads, and stays when there is none  -->
+                        <FontIcon
+                            Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                            FontSize="20"
+                            Glyph="{x:Bind local:FlyoutPage.PlaceholderGlyph(IsPerson)}" />
+                        <Image Stretch="UniformToFill">
+                            <Image.Source>
+                                <BitmapImage DecodePixelType="Logical" DecodePixelWidth="46" UriSource="{x:Bind PosterUri}" />
+                            </Image.Source>
+                        </Image>
+                    </Grid>
+                </Border>
+                <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                    <TextBlock
+                        MaxLines="2"
+                        Style="{StaticResource BodyStrongTextBlockStyle}"
+                        Text="{x:Bind DisplayTitle}"
+                        TextTrimming="CharacterEllipsis"
+                        TextWrapping="Wrap" />
+                    <TextBlock
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        Style="{StaticResource CaptionTextBlockStyle}"
+                        Text="{x:Bind Subtitle}" />
+                    <TextBlock
+                        Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                        MaxLines="1"
+                        Style="{StaticResource CaptionTextBlockStyle}"
+                        Text="{x:Bind Overview}"
+                        TextTrimming="CharacterEllipsis" />
+                </StackPanel>
+                <StackPanel
+                    Grid.Column="2"
+                    VerticalAlignment="Center"
+                    Orientation="Horizontal"
+                    Spacing="4"
+                    Visibility="{x:Bind local:FlyoutPage.VisibleIf(RatingText)}">
+                    <FontIcon
+                        Foreground="{ThemeResource SystemFillColorCautionBrush}"
+                        FontSize="12"
+                        Glyph="&#xE735;" />
+                    <TextBlock Style="{StaticResource CaptionTextBlockStyle}" Text="{x:Bind RatingText}" />
+                </StackPanel>
+            </Grid>
+        </DataTemplate>
 
-        <!--  Header  -->
-        <Grid ColumnSpacing="4">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
+        <!--  A My stuff row: the search row's layout, with the user's flags in place of the overview  -->
+        <DataTemplate x:Key="LibraryTemplate" x:DataType="tmdb:LibraryEntry">
+            <Grid Padding="0,6" ColumnSpacing="12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="46" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Border
+                    Width="46"
+                    Height="69"
+                    Background="{ThemeResource ControlAltFillColorTertiaryBrush}"
+                    CornerRadius="4">
+                    <Grid>
+                        <FontIcon
+                            Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                            FontSize="20"
+                            Glyph="&#xE714;" />
+                        <Image Stretch="UniformToFill">
+                            <Image.Source>
+                                <BitmapImage DecodePixelType="Logical" DecodePixelWidth="46" UriSource="{x:Bind PosterUri}" />
+                            </Image.Source>
+                        </Image>
+                    </Grid>
+                </Border>
+                <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                    <TextBlock
+                        MaxLines="2"
+                        Style="{StaticResource BodyStrongTextBlockStyle}"
+                        Text="{x:Bind Title}"
+                        TextTrimming="CharacterEllipsis"
+                        TextWrapping="Wrap" />
+                    <TextBlock
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        Style="{StaticResource CaptionTextBlockStyle}"
+                        Text="{x:Bind Subtitle}" />
+                    <TextBlock
+                        Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                        Style="{StaticResource CaptionTextBlockStyle}"
+                        Text="{x:Bind StatusText}" />
+                </StackPanel>
+            </Grid>
+        </DataTemplate>
+
+        <!--  Borderless button around a tile, so a cast photo or a title poster can be clicked or tabbed to  -->
+        <Style
+            x:Key="TileButtonStyle"
+            BasedOn="{StaticResource DefaultButtonStyle}"
+            TargetType="Button">
+            <Setter Property="Padding" Value="4" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="VerticalAlignment" Value="Stretch" />
+            <Setter Property="VerticalContentAlignment" Value="Top" />
+        </Style>
+
+        <DataTemplate x:Key="CastTemplate" x:DataType="tmdb:TmdbCastMember">
+            <Button
+                AutomationProperties.Name="{x:Bind Name}"
+                Click="CastMember_Click"
+                Style="{StaticResource TileButtonStyle}"
+                Tag="{x:Bind}">
+                <StackPanel Width="72" Spacing="4">
+                    <PersonPicture
+                        Width="56"
+                        Height="56"
+                        DisplayName="{x:Bind Name}">
+                        <PersonPicture.ProfilePicture>
+                            <BitmapImage DecodePixelType="Logical" DecodePixelWidth="56" UriSource="{x:Bind ProfileUri}" />
+                        </PersonPicture.ProfilePicture>
+                    </PersonPicture>
+                    <TextBlock
+                        HorizontalAlignment="Center"
+                        HorizontalTextAlignment="Center"
+                        MaxLines="2"
+                        Style="{StaticResource CaptionTextBlockStyle}"
+                        Text="{x:Bind Name}"
+                        TextTrimming="CharacterEllipsis"
+                        TextWrapping="Wrap" />
+                    <TextBlock
+                        HorizontalAlignment="Center"
+                        HorizontalTextAlignment="Center"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        MaxLines="2"
+                        Style="{StaticResource CaptionTextBlockStyle}"
+                        Text="{x:Bind Character}"
+                        TextTrimming="CharacterEllipsis"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+            </Button>
+        </DataTemplate>
+
+        <DataTemplate x:Key="TitleTileTemplate" x:DataType="tmdb:TmdbSearchItem">
+            <Button
+                AutomationProperties.Name="{x:Bind DisplayTitle}"
+                Click="KnownForTile_Click"
+                Style="{StaticResource TileButtonStyle}"
+                Tag="{x:Bind}">
+                <StackPanel Width="84" Spacing="2">
+                    <Border
+                        Width="84"
+                        Height="126"
+                        Margin="0,0,0,4"
+                        Background="{ThemeResource ControlAltFillColorTertiaryBrush}"
+                        CornerRadius="4">
+                        <Image Stretch="UniformToFill">
+                            <Image.Source>
+                                <BitmapImage DecodePixelType="Logical" DecodePixelWidth="84" UriSource="{x:Bind TileUri}" />
+                            </Image.Source>
+                        </Image>
+                    </Border>
+                    <TextBlock
+                        MaxLines="2"
+                        Style="{StaticResource CaptionTextBlockStyle}"
+                        Text="{x:Bind DisplayTitle}"
+                        TextTrimming="CharacterEllipsis"
+                        TextWrapping="Wrap" />
+                    <TextBlock
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        MaxLines="2"
+                        Style="{StaticResource CaptionTextBlockStyle}"
+                        Text="{x:Bind local:FlyoutPage.JoinParts(YearText, RoleText)}"
+                        TextTrimming="CharacterEllipsis"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+            </Button>
+        </DataTemplate>
+    </Page.Resources>
+
+    <Grid>
+        <!--  Search view  -->
+        <Grid
+            x:Name="SearchView"
+            Padding="16,12,12,12"
+            RowSpacing="10">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <!--  Header  -->
+            <Grid ColumnSpacing="4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBlock
+                    x:Name="TitleText"
+                    VerticalAlignment="Center"
+                    Style="{StaticResource SubtitleTextBlockStyle}"
+                    Text="Tray MDB" />
+                <!--  Switches between discover (trending and search) and My stuff  -->
+                <Button
+                    x:Name="LibraryButton"
+                    Grid.Column="1"
+                    AutomationProperties.Name="My stuff"
+                    Click="LibraryButton_Click"
+                    Style="{StaticResource FlyoutIconButtonStyle}"
+                    ToolTipService.ToolTip="My stuff">
+                    <FontIcon
+                        x:Name="LibraryButtonIcon"
+                        FontSize="14"
+                        Glyph="&#xE8F1;" />
+                </Button>
+                <Button
+                    Grid.Column="2"
+                    AutomationProperties.Name="Settings"
+                    Click="SettingsButton_Click"
+                    Style="{StaticResource FlyoutIconButtonStyle}"
+                    ToolTipService.ToolTip="Settings">
+                    <FontIcon FontSize="14" Glyph="&#xE713;" />
+                </Button>
+            </Grid>
+
+            <TextBox
+                x:Name="SearchBox"
+                Grid.Row="1"
+                Margin="0,0,4,0"
+                AutomationProperties.Name="Search movies, TV, and people"
+                KeyDown="SearchBox_KeyDown"
+                PlaceholderText="Search movies, TV, and people"
+                TextChanged="SearchBox_TextChanged" />
+
+            <SelectorBar
+                x:Name="LibraryFilterBar"
+                Grid.Row="1"
+                Margin="-8,-4,4,0"
+                AutomationProperties.Name="Show"
+                SelectionChanged="LibraryFilterBar_SelectionChanged"
+                Visibility="Collapsed">
+                <SelectorBarItem
+                    IsSelected="True"
+                    Tag="All"
+                    Text="All" />
+                <SelectorBarItem Tag="Seen" Text="Seen" />
+                <SelectorBarItem Tag="WantToWatch" Text="Want to see" />
+            </SelectorBar>
+
+            <!--  Errors keep the last good results visible underneath  -->
+            <InfoBar
+                x:Name="StatusBar"
+                Grid.Row="2"
+                Margin="0,0,4,0"
+                IsClosable="False"
+                IsOpen="False"
+                Severity="Warning" />
+
             <TextBlock
-                x:Name="TitleText"
-                VerticalAlignment="Center"
-                Style="{StaticResource SubtitleTextBlockStyle}"
-                Text="Tray MDB" />
-            <Button
-                x:Name="RefreshButton"
-                Grid.Column="1"
-                AutomationProperties.Name="Refresh"
-                Click="RefreshButton_Click"
-                Style="{StaticResource FlyoutIconButtonStyle}"
-                ToolTipService.ToolTip="Refresh">
-                <FontIcon FontSize="14" Glyph="&#xE72C;" />
-            </Button>
-            <Button
-                Grid.Column="2"
-                AutomationProperties.Name="Settings"
-                Click="SettingsButton_Click"
-                Style="{StaticResource FlyoutIconButtonStyle}"
-                ToolTipService.ToolTip="Settings">
-                <FontIcon FontSize="14" Glyph="&#xE713;" />
-            </Button>
+                x:Name="ListHeader"
+                Grid.Row="3"
+                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                Style="{StaticResource CaptionTextBlockStyle}"
+                Text="Trending today" />
+
+            <ListView
+                x:Name="ResultsList"
+                Grid.Row="4"
+                Margin="-12,0,0,0"
+                AutomationProperties.Name="Results"
+                IsItemClickEnabled="True"
+                ItemClick="ResultsList_ItemClick"
+                ItemTemplate="{StaticResource ResultTemplate}"
+                SelectionMode="None" />
+
+            <!--  Empty, missing-key, and first-load states  -->
+            <StackPanel
+                x:Name="MessagePanel"
+                Grid.Row="4"
+                Margin="8,24"
+                VerticalAlignment="Top"
+                Spacing="12"
+                Visibility="Collapsed">
+                <TextBlock
+                    x:Name="MessageText"
+                    HorizontalAlignment="Center"
+                    HorizontalTextAlignment="Center"
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                    TextWrapping="Wrap" />
+            </StackPanel>
+            <ProgressRing
+                x:Name="CenterRing"
+                Grid.Row="4"
+                Margin="0,48"
+                VerticalAlignment="Top"
+                IsActive="False" />
+
+            <!--  Footer  -->
+            <Grid Grid.Row="5" Margin="0,0,4,0">
+                <TextBlock
+                    VerticalAlignment="Center"
+                    Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                    Style="{StaticResource CaptionTextBlockStyle}"
+                    Text="Data from TMDB" />
+                <ProgressRing
+                    x:Name="LoadingRing"
+                    Width="16"
+                    Height="16"
+                    HorizontalAlignment="Right"
+                    IsActive="False" />
+            </Grid>
         </Grid>
 
-        <!--  Errors keep the last good content visible underneath  -->
-        <InfoBar
-            x:Name="StatusBar"
-            Grid.Row="1"
-            IsClosable="False"
-            IsOpen="False"
-            Severity="Warning" />
+        <!--  Detail view  -->
+        <Grid
+            x:Name="DetailView"
+            Padding="12,12,12,12"
+            RowSpacing="8"
+            Visibility="Collapsed">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Grid.Transitions>
+                <TransitionCollection>
+                    <EntranceThemeTransition FromHorizontalOffset="24" FromVerticalOffset="0" />
+                </TransitionCollection>
+            </Grid.Transitions>
 
-        <!--  Content: replace with the app's own view  -->
-        <Border
-            Grid.Row="2"
-            Padding="16"
-            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-            BorderThickness="1"
-            CornerRadius="8">
-            <StackPanel VerticalAlignment="Center" Spacing="4">
-                <TextBlock
-                    x:Name="ValueText"
-                    HorizontalAlignment="Center"
-                    Style="{StaticResource TitleLargeTextBlockStyle}"
-                    Text="--" />
-                <TextBlock
-                    HorizontalAlignment="Center"
-                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                    Text="Replace this card with the app's content." />
-            </StackPanel>
-        </Border>
+            <Grid.KeyboardAccelerators>
+                <KeyboardAccelerator
+                    Key="Home"
+                    Invoked="Home_Invoked"
+                    Modifiers="Menu" />
+            </Grid.KeyboardAccelerators>
 
-        <!--  Footer  -->
-        <Grid Grid.Row="3">
-            <TextBlock
-                x:Name="UpdatedText"
-                VerticalAlignment="Center"
-                Foreground="{ThemeResource TextFillColorTertiaryBrush}"
-                Style="{StaticResource CaptionTextBlockStyle}" />
-            <ProgressRing
-                x:Name="LoadingRing"
-                Width="16"
-                Height="16"
-                HorizontalAlignment="Right"
-                IsActive="False" />
+            <Grid ColumnSpacing="4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Button
+                    x:Name="BackButton"
+                    AutomationProperties.Name="Back"
+                    Click="BackButton_Click"
+                    Style="{StaticResource FlyoutIconButtonStyle}"
+                    ToolTipService.ToolTip="Back (Esc)">
+                    <FontIcon FontSize="14" Glyph="&#xE72B;" />
+                </Button>
+                <!--  Only after following a link; before that, Back already goes home  -->
+                <Button
+                    x:Name="HomeButton"
+                    Grid.Column="1"
+                    AutomationProperties.Name="Back to search"
+                    Click="HomeButton_Click"
+                    Style="{StaticResource FlyoutIconButtonStyle}"
+                    ToolTipService.ToolTip="Back to search (Alt+Home)"
+                    Visibility="Collapsed">
+                    <FontIcon FontSize="14" Glyph="&#xE80F;" />
+                </Button>
+                <TextBlock
+                    x:Name="DetailHeaderText"
+                    Grid.Column="2"
+                    VerticalAlignment="Center"
+                    Style="{StaticResource BodyStrongTextBlockStyle}"
+                    TextTrimming="CharacterEllipsis" />
+                <Button
+                    Grid.Column="3"
+                    AutomationProperties.Name="Open on TMDB"
+                    Click="OpenTmdb_Click"
+                    Style="{StaticResource FlyoutIconButtonStyle}"
+                    ToolTipService.ToolTip="Open on TMDB">
+                    <FontIcon FontSize="14" Glyph="&#xE8A7;" />
+                </Button>
+            </Grid>
+
+            <ScrollViewer
+                x:Name="DetailScroller"
+                Grid.Row="1"
+                Padding="4,0,4,0">
+                <StackPanel Padding="0,0,0,12" Spacing="12">
+                    <Border
+                        x:Name="BackdropBorder"
+                        Height="180"
+                        Background="{ThemeResource ControlAltFillColorTertiaryBrush}"
+                        CornerRadius="8">
+                        <Image x:Name="BackdropImage" Stretch="UniformToFill" />
+                    </Border>
+
+                    <Grid ColumnSpacing="12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="92" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Border
+                            Width="92"
+                            Height="138"
+                            VerticalAlignment="Top"
+                            Background="{ThemeResource ControlAltFillColorTertiaryBrush}"
+                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                            BorderThickness="1"
+                            CornerRadius="6">
+                            <Image x:Name="PosterImage" Stretch="UniformToFill" />
+                        </Border>
+                        <StackPanel Grid.Column="1" Spacing="4">
+                            <TextBlock
+                                x:Name="DetailTitle"
+                                IsTextSelectionEnabled="True"
+                                Style="{StaticResource SubtitleTextBlockStyle}"
+                                TextWrapping="Wrap" />
+                            <TextBlock
+                                x:Name="DetailMeta"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Style="{StaticResource CaptionTextBlockStyle}"
+                                TextWrapping="Wrap" />
+                            <StackPanel
+                                x:Name="DetailRatingPanel"
+                                Orientation="Horizontal"
+                                Spacing="6">
+                                <FontIcon
+                                    Foreground="{ThemeResource SystemFillColorCautionBrush}"
+                                    FontSize="14"
+                                    Glyph="&#xE735;" />
+                                <TextBlock x:Name="DetailRating" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                                <TextBlock
+                                    x:Name="DetailVotes"
+                                    VerticalAlignment="Center"
+                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                    Style="{StaticResource CaptionTextBlockStyle}" />
+                            </StackPanel>
+                            <TextBlock
+                                x:Name="DetailGenres"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Style="{StaticResource CaptionTextBlockStyle}"
+                                TextWrapping="Wrap" />
+                            <!--  Movies and shows only; hidden for a person  -->
+                            <StackPanel
+                                x:Name="LibraryPanel"
+                                Margin="0,6,0,0"
+                                Orientation="Horizontal"
+                                Spacing="8">
+                                <ToggleButton x:Name="SeenToggle" Click="SeenToggle_Click">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <FontIcon FontSize="14" Glyph="&#xE73E;" />
+                                        <TextBlock Text="Seen" />
+                                    </StackPanel>
+                                </ToggleButton>
+                                <ToggleButton x:Name="WantToggle" Click="WantToggle_Click">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <FontIcon FontSize="14" Glyph="&#xE8A4;" />
+                                        <TextBlock Text="Want to watch" />
+                                    </StackPanel>
+                                </ToggleButton>
+                            </StackPanel>
+                        </StackPanel>
+                    </Grid>
+
+                    <!--  A person's best-known titles, above the (often long) biography  -->
+                    <StackPanel x:Name="KnownForSection" Spacing="8">
+                        <TextBlock Style="{StaticResource BodyStrongTextBlockStyle}" Text="Known for" />
+                        <ScrollViewer
+                            HorizontalScrollBarVisibility="Auto"
+                            HorizontalScrollMode="Enabled"
+                            VerticalScrollBarVisibility="Disabled"
+                            VerticalScrollMode="Disabled">
+                            <ItemsRepeater
+                                x:Name="KnownForRepeater"
+                                Margin="0,0,0,12"
+                                ItemTemplate="{StaticResource TitleTileTemplate}">
+                                <ItemsRepeater.Layout>
+                                    <StackLayout Orientation="Horizontal" Spacing="4" />
+                                </ItemsRepeater.Layout>
+                            </ItemsRepeater>
+                        </ScrollViewer>
+                    </StackPanel>
+
+
+                    <ProgressRing
+                        x:Name="DetailRing"
+                        Width="24"
+                        Height="24"
+                        IsActive="False" />
+
+                    <InfoBar
+                        x:Name="DetailStatusBar"
+                        IsClosable="False"
+                        IsOpen="False"
+                        Severity="Warning" />
+
+                    <TextBlock
+                        x:Name="DetailTagline"
+                        FontStyle="Italic"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        TextWrapping="Wrap" />
+                    <TextBlock
+                        x:Name="DetailOverview"
+                        IsTextSelectionEnabled="True"
+                        TextWrapping="Wrap" />
+                    <TextBlock
+                        x:Name="DetailCredit"
+                        Style="{StaticResource BodyStrongTextBlockStyle}"
+                        TextWrapping="Wrap" />
+                    <TextBlock
+                        x:Name="DetailWatch"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        TextWrapping="Wrap" />
+
+                    <!--  Links  -->
+                    <StackPanel
+                        x:Name="LinksPanel"
+                        Orientation="Horizontal"
+                        Spacing="8">
+                        <Button x:Name="TrailerButton" Click="TrailerButton_Click">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <FontIcon FontSize="14" Glyph="&#xE768;" />
+                                <TextBlock Text="Trailer" />
+                            </StackPanel>
+                        </Button>
+                        <Button x:Name="WatchButton" Click="WatchButton_Click">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <FontIcon FontSize="14" Glyph="&#xE714;" />
+                                <TextBlock Text="Where to watch" />
+                            </StackPanel>
+                        </Button>
+                        <Button
+                            x:Name="ImdbButton"
+                            Click="ImdbButton_Click"
+                            Content="IMDb" />
+                    </StackPanel>
+
+                    <!--  Cast  -->
+                    <StackPanel x:Name="CastSection" Spacing="8">
+                        <TextBlock Style="{StaticResource BodyStrongTextBlockStyle}" Text="Cast" />
+                        <ScrollViewer
+                            HorizontalScrollBarVisibility="Auto"
+                            HorizontalScrollMode="Enabled"
+                            VerticalScrollBarVisibility="Disabled"
+                            VerticalScrollMode="Disabled">
+                            <ItemsRepeater
+                                x:Name="CastRepeater"
+                                Margin="0,0,0,12"
+                                ItemTemplate="{StaticResource CastTemplate}">
+                                <ItemsRepeater.Layout>
+                                    <StackLayout Orientation="Horizontal" Spacing="4" />
+                                </ItemsRepeater.Layout>
+                            </ItemsRepeater>
+                        </ScrollViewer>
+                    </StackPanel>
+
+                    <!--  Crew: same tiles as the cast, with the job where the character would be  -->
+                    <StackPanel x:Name="CrewSection" Spacing="8">
+                        <TextBlock Style="{StaticResource BodyStrongTextBlockStyle}" Text="Crew" />
+                        <ScrollViewer
+                            HorizontalScrollBarVisibility="Auto"
+                            HorizontalScrollMode="Enabled"
+                            VerticalScrollBarVisibility="Disabled"
+                            VerticalScrollMode="Disabled">
+                            <ItemsRepeater
+                                x:Name="CrewRepeater"
+                                Margin="0,0,0,12"
+                                ItemTemplate="{StaticResource CastTemplate}">
+                                <ItemsRepeater.Layout>
+                                    <StackLayout Orientation="Horizontal" Spacing="4" />
+                                </ItemsRepeater.Layout>
+                            </ItemsRepeater>
+                        </ScrollViewer>
+                    </StackPanel>
+
+                    <TextBlock
+                        x:Name="WatchAttribution"
+                        Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                        Style="{StaticResource CaptionTextBlockStyle}"
+                        Text="Where-to-watch data by JustWatch." />
+                </StackPanel>
+            </ScrollViewer>
         </Grid>
     </Grid>
 </Page>
