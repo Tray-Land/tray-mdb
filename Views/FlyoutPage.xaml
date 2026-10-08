@@ -25,10 +25,10 @@
                         <FontIcon
                             Foreground="{ThemeResource TextFillColorTertiaryBrush}"
                             FontSize="20"
-                            Glyph="{x:Bind local:FlyoutPage.PlaceholderGlyph(IsPerson)}" />
+                            Glyph="{x:Bind local:FlyoutPage.PlaceholderGlyph(IsPerson), Mode=OneTime}" />
                         <Image Stretch="UniformToFill">
                             <Image.Source>
-                                <BitmapImage DecodePixelType="Logical" DecodePixelWidth="46" UriSource="{x:Bind PosterUri}" />
+                                <BitmapImage DecodePixelType="Logical" DecodePixelWidth="46" UriSource="{x:Bind PosterUri, Mode=OneTime}" />
                             </Image.Source>
                         </Image>
                     </Grid>
@@ -37,18 +37,18 @@
                     <TextBlock
                         MaxLines="2"
                         Style="{StaticResource BodyStrongTextBlockStyle}"
-                        Text="{x:Bind DisplayTitle}"
+                        Text="{x:Bind DisplayTitle, Mode=OneTime}"
                         TextTrimming="CharacterEllipsis"
                         TextWrapping="Wrap" />
                     <TextBlock
                         Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                         Style="{StaticResource CaptionTextBlockStyle}"
-                        Text="{x:Bind Subtitle}" />
+                        Text="{x:Bind Subtitle, Mode=OneTime}" />
                     <TextBlock
                         Foreground="{ThemeResource TextFillColorTertiaryBrush}"
                         MaxLines="1"
                         Style="{StaticResource CaptionTextBlockStyle}"
-                        Text="{x:Bind Overview}"
+                        Text="{x:Bind Overview, Mode=OneTime}"
                         TextTrimming="CharacterEllipsis" />
                 </StackPanel>
                 <StackPanel
@@ -56,12 +56,12 @@
                     VerticalAlignment="Center"
                     Orientation="Horizontal"
                     Spacing="4"
-                    Visibility="{x:Bind local:FlyoutPage.VisibleIf(RatingText)}">
+                    Visibility="{x:Bind local:FlyoutPage.VisibleIf(RatingText), Mode=OneTime}">
                     <FontIcon
                         Foreground="{ThemeResource SystemFillColorCautionBrush}"
                         FontSize="12"
                         Glyph="&#xE735;" />
-                    <TextBlock Style="{StaticResource CaptionTextBlockStyle}" Text="{x:Bind RatingText}" />
+                    <TextBlock Style="{StaticResource CaptionTextBlockStyle}" Text="{x:Bind RatingText, Mode=OneTime}" />
                 </StackPanel>
             </Grid>
         </DataTemplate>
@@ -85,7 +85,7 @@
                             Glyph="&#xE714;" />
                         <Image Stretch="UniformToFill">
                             <Image.Source>
-                                <BitmapImage DecodePixelType="Logical" DecodePixelWidth="46" UriSource="{x:Bind PosterUri}" />
+                                <BitmapImage DecodePixelType="Logical" DecodePixelWidth="46" UriSource="{x:Bind PosterUri, Mode=OneTime}" />
                             </Image.Source>
                         </Image>
                     </Grid>
@@ -94,17 +94,17 @@
                     <TextBlock
                         MaxLines="2"
                         Style="{StaticResource BodyStrongTextBlockStyle}"
-                        Text="{x:Bind Title}"
+                        Text="{x:Bind Title, Mode=OneTime}"
                         TextTrimming="CharacterEllipsis"
                         TextWrapping="Wrap" />
                     <TextBlock
                         Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                         Style="{StaticResource CaptionTextBlockStyle}"
-                        Text="{x:Bind Subtitle}" />
+                        Text="{x:Bind Subtitle, Mode=OneTime}" />
                     <TextBlock
                         Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
                         Style="{StaticResource CaptionTextBlockStyle}"
-                        Text="{x:Bind StatusText}" />
+                        Text="{x:Bind StatusText, Mode=OneTime}" />
                 </StackPanel>
             </Grid>
         </DataTemplate>
@@ -123,7 +123,7 @@
 
         <DataTemplate x:Key="CastTemplate" x:DataType="tmdb:TmdbCastMember">
             <Button
-                AutomationProperties.Name="{x:Bind Name}"
+                AutomationProperties.Name="{x:Bind Name, Mode=OneTime}"
                 Click="CastMember_Click"
                 Style="{StaticResource TileButtonStyle}"
                 Tag="{x:Bind}">
@@ -131,9 +131,9 @@
                     <PersonPicture
                         Width="56"
                         Height="56"
-                        DisplayName="{x:Bind Name}">
+                        DisplayName="{x:Bind Name, Mode=OneTime}">
                         <PersonPicture.ProfilePicture>
-                            <BitmapImage DecodePixelType="Logical" DecodePixelWidth="56" UriSource="{x:Bind ProfileUri}" />
+                            <BitmapImage DecodePixelType="Logical" DecodePixelWidth="56" UriSource="{x:Bind ProfileUri, Mode=OneTime}" />
                         </PersonPicture.ProfilePicture>
                     </PersonPicture>
                     <TextBlock
@@ -141,7 +141,7 @@
                         HorizontalTextAlignment="Center"
                         MaxLines="2"
                         Style="{StaticResource CaptionTextBlockStyle}"
-                        Text="{x:Bind Name}"
+                        Text="{x:Bind Name, Mode=OneTime}"
                         TextTrimming="CharacterEllipsis"
                         TextWrapping="Wrap" />
                     <TextBlock
@@ -150,7 +150,7 @@
                         Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                         MaxLines="2"
                         Style="{StaticResource CaptionTextBlockStyle}"
-                        Text="{x:Bind Character}"
+                        Text="{x:Bind Character, Mode=OneTime}"
                         TextTrimming="CharacterEllipsis"
                         TextWrapping="Wrap" />
                 </StackPanel>
@@ -159,7 +159,7 @@
 
         <DataTemplate x:Key="TitleTileTemplate" x:DataType="tmdb:TmdbSearchItem">
             <Button
-                AutomationProperties.Name="{x:Bind DisplayTitle}"
+                AutomationProperties.Name="{x:Bind DisplayTitle, Mode=OneTime}"
                 Click="KnownForTile_Click"
                 Style="{StaticResource TileButtonStyle}"
                 Tag="{x:Bind}">
@@ -172,21 +172,21 @@
                         CornerRadius="4">
                         <Image Stretch="UniformToFill">
                             <Image.Source>
-                                <BitmapImage DecodePixelType="Logical" DecodePixelWidth="84" UriSource="{x:Bind TileUri}" />
+                                <BitmapImage DecodePixelType="Logical" DecodePixelWidth="84" UriSource="{x:Bind TileUri, Mode=OneTime}" />
                             </Image.Source>
                         </Image>
                     </Border>
                     <TextBlock
                         MaxLines="2"
                         Style="{StaticResource CaptionTextBlockStyle}"
-                        Text="{x:Bind DisplayTitle}"
+                        Text="{x:Bind DisplayTitle, Mode=OneTime}"
                         TextTrimming="CharacterEllipsis"
                         TextWrapping="Wrap" />
                     <TextBlock
                         Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                         MaxLines="2"
                         Style="{StaticResource CaptionTextBlockStyle}"
-                        Text="{x:Bind local:FlyoutPage.JoinParts(YearText, RoleText)}"
+                        Text="{x:Bind local:FlyoutPage.JoinParts(YearText, RoleText), Mode=OneTime}"
                         TextTrimming="CharacterEllipsis"
                         TextWrapping="Wrap" />
                 </StackPanel>
