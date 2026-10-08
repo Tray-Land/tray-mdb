@@ -200,10 +200,29 @@ public sealed class TmdbWatchRegion
 
 public sealed class TmdbProvider
 {
+    public int ProviderId { get; set; }
+
     public string? ProviderName { get; set; }
 
     public int DisplayPriority { get; set; }
+
+    public string? LogoPath { get; set; }
+
+    [JsonIgnore]
+    public Uri? LogoUri => TmdbFormat.ImageUri(LogoPath, "w92");
 }
+
+public enum WatchOfferKind
+{
+    Subscription,
+    Free,
+    Ads,
+    Rent,
+    Buy,
+}
+
+/// <summary>One availability category, with providers in TMDB's display order.</summary>
+public sealed record TmdbProviderGroup(WatchOfferKind Kind, List<TmdbProvider> Providers);
 
 public sealed class TmdbResults<T>
 {

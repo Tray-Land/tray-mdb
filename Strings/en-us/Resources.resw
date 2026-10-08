@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="WatchExpander.Header" xml:space="preserve">
+    <value>Where to watch</value>
+  </data>
+  <data name="WatchExpander.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Where to watch</value>
+  </data>
+  <data name="WatchSubscription" xml:space="preserve">
+    <value>Subscription</value>
+  </data>
+  <data name="WatchFree" xml:space="preserve">
+    <value>Free</value>
+  </data>
+  <data name="WatchAds" xml:space="preserve">
+    <value>Free with ads</value>
+  </data>
+  <data name="WatchRent" xml:space="preserve">
+    <value>Rent</value>
+  </data>
+  <data name="WatchBuy" xml:space="preserve">
+    <value>Buy</value>
+  </data>
+  <data name="WatchRegion" xml:space="preserve">
+    <value>Availability in {0}</value>
+    <comment>{0} is the Windows region's two-letter country code, such as US.</comment>
+  </data>
+  <data name="WatchEmpty" xml:space="preserve">
+    <value>No watch providers are listed for {0}.</value>
+    <comment>{0} is the Windows region's two-letter country code. This does not mean the title is unavailable everywhere.</comment>
+  </data>
+  <data name="WatchAttribution.Text" xml:space="preserve">
+    <value>Where-to-watch data by JustWatch.</value>
+  </data>
+</root>

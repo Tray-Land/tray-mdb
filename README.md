@@ -32,7 +32,11 @@ no tab to find, nothing running while the flyout is closed.
 - **Trending today.** With an empty search box the list shows today's trending movies and shows,
   refreshed every 30 minutes — but only while the flyout is actually on screen.
 - **Detail pages.** Poster and backdrop, tagline, overview, rating and vote count, genres, cast and
-  crew, and buttons to open the trailer, the where-to-watch page, IMDb, or the title on TMDB.
+  crew, and buttons to open the trailer, IMDb, or the title on TMDB.
+- **Where to watch, inside the app.** Expand the section on a movie or show to see provider names
+  and logos for your Windows region, grouped by subscription, free, free with ads, rent, and buy.
+  It uses the availability already fetched with the details; no browser opens. If TMDB has no
+  providers listed for your region, the section says so.
 - **Follow the credits.** Click a cast member to open their page, click one of their "Known for"
   titles to open that, and walk back out with `Esc`, `Alt`+`Left`, or the mouse back button.
 - **My stuff.** Flag any movie or show as *Seen* or *Want to watch* and the library button swaps the
@@ -178,6 +182,9 @@ visible. The poller runs one refresh at a time, backs off exponentially on failu
 minutes), retries immediately when the network comes back, and cancels in flight work on `Stop()`.
 `FlyoutPage.OnHidden()` stops the poller and cancels pending searches and detail loads. Detail
 pages are cached (20 entries) for the lifetime of the page.
+Where-to-watch rows are kept between expander toggles to avoid rebuilding the layout, and released
+when the flyout hides. While its header is visible, it anchors the detail scroll position as the
+section expands or collapses.
 
 ## Design rules
 

@@ -8,6 +8,54 @@
     Background="Transparent">
 
     <Page.Resources>
+        <DataTemplate x:Key="WatchProviderTemplate" x:DataType="tmdb:TmdbProvider">
+            <Grid Padding="0,4" ColumnSpacing="12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="32" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Border
+                    Width="32"
+                    Height="32"
+                    VerticalAlignment="Center"
+                    Background="{ThemeResource ControlAltFillColorTertiaryBrush}"
+                    CornerRadius="4">
+                    <Grid>
+                        <FontIcon
+                            AutomationProperties.AccessibilityView="Raw"
+                            Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                            FontSize="14"
+                            Glyph="&#xE714;" />
+                        <Image
+                            AutomationProperties.AccessibilityView="Raw"
+                            Stretch="Uniform">
+                            <Image.Source>
+                                <BitmapImage DecodePixelType="Logical" DecodePixelWidth="32" UriSource="{x:Bind LogoUri, Mode=OneTime}" />
+                            </Image.Source>
+                        </Image>
+                    </Grid>
+                </Border>
+                <TextBlock
+                    Grid.Column="1"
+                    VerticalAlignment="Center"
+                    Text="{x:Bind ProviderName, Mode=OneTime}"
+                    TextWrapping="Wrap" />
+            </Grid>
+        </DataTemplate>
+
+        <DataTemplate x:Key="WatchGroupTemplate" x:DataType="tmdb:TmdbProviderGroup">
+            <StackPanel Margin="0,0,0,12" Spacing="4">
+                <TextBlock
+                    AutomationProperties.HeadingLevel="Level3"
+                    Style="{StaticResource BodyStrongTextBlockStyle}"
+                    Text="{x:Bind local:FlyoutPage.WatchGroupLabel(Kind), Mode=OneTime}"
+                    TextWrapping="Wrap" />
+                <ItemsRepeater
+                    ItemsSource="{x:Bind Providers, Mode=OneTime}"
+                    ItemTemplate="{StaticResource WatchProviderTemplate}" />
+            </StackPanel>
+        </DataTemplate>
+
         <DataTemplate x:Key="ResultTemplate" x:DataType="tmdb:TmdbSearchItem">
             <Grid Padding="0,6" ColumnSpacing="12">
                 <Grid.ColumnDefinitions>
@@ -400,7 +448,8 @@
             <ScrollViewer
                 x:Name="DetailScroller"
                 Grid.Row="1"
-                Padding="4,0,4,0">
+                Padding="4,0,4,0"
+                AnchorRequested="DetailScroller_AnchorRequested">
                 <StackPanel Padding="0,0,0,12" Spacing="12">
                     <Border
                         x:Name="BackdropBorder"
@@ -539,17 +588,40 @@
                                 <TextBlock Text="Trailer" />
                             </StackPanel>
                         </Button>
-                        <Button x:Name="WatchButton" Click="WatchButton_Click">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <FontIcon FontSize="14" Glyph="&#xE714;" />
-                                <TextBlock Text="Where to watch" />
-                            </StackPanel>
-                        </Button>
                         <Button
                             x:Name="ImdbButton"
                             Click="ImdbButton_Click"
                             Content="IMDb" />
                     </StackPanel>
+
+                    <Expander
+                        x:Name="WatchExpander"
+                        x:Uid="WatchExpander"
+                        AutomationProperties.AutomationId="WhereToWatch"
+                        HorizontalAlignment="Stretch"
+                        HorizontalContentAlignment="Stretch"
+                        Expanding="WatchExpander_Expanding"
+                        Visibility="Collapsed">
+                        <StackPanel Spacing="8">
+                            <TextBlock
+                                x:Name="WatchRegionText"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Style="{StaticResource CaptionTextBlockStyle}"
+                                TextWrapping="Wrap" />
+                            <ItemsRepeater
+                                x:Name="WatchGroupsRepeater"
+                                ItemTemplate="{StaticResource WatchGroupTemplate}" />
+                            <TextBlock
+                                x:Name="WatchEmptyText"
+                                TextWrapping="Wrap"
+                                Visibility="Collapsed" />
+                            <TextBlock
+                                x:Uid="WatchAttribution"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Style="{StaticResource CaptionTextBlockStyle}"
+                                TextWrapping="Wrap" />
+                        </StackPanel>
+                    </Expander>
 
                     <!--  Cast  -->
                     <StackPanel x:Name="CastSection" Spacing="8">
@@ -589,11 +661,6 @@
                         </ScrollViewer>
                     </StackPanel>
 
-                    <TextBlock
-                        x:Name="WatchAttribution"
-                        Foreground="{ThemeResource TextFillColorTertiaryBrush}"
-                        Style="{StaticResource CaptionTextBlockStyle}"
-                        Text="Where-to-watch data by JustWatch." />
                 </StackPanel>
             </ScrollViewer>
         </Grid>

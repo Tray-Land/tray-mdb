@@ -314,11 +314,40 @@ public static class TmdbFormat
         return string.Empty;
     }
 
-    public static Uri? WatchUri(TmdbDetails details, string region) =>
-        details.WatchProviders?.Results.TryGetValue(region.ToUpperInvariant(), out TmdbWatchRegion? watch) == true
-        && Uri.TryCreate(watch.Link, UriKind.Absolute, out Uri? uri)
-            ? uri
-            : null;
+    /// <summary>All watch options in the requested region, without mixing rental and purchase offers.</summary>
+    public static List<TmdbProviderGroup> WatchGroups(TmdbDetails details, string region)
+    {
+        if (details.WatchProviders?.Results is not { } regions
+            || !regions.TryGetValue(region.ToUpperInvariant(), out TmdbWatchRegion? watch))
+        {
+            return [];
+        }
+
+        (WatchOfferKind Kind, List<TmdbProvider>? Providers)[] categories =
+        [
+            (WatchOfferKind.Subscription, watch.Flatrate),
+            (WatchOfferKind.Free, watch.Free),
+            (WatchOfferKind.Ads, watch.Ads),
+            (WatchOfferKind.Rent, watch.Rent),
+            (WatchOfferKind.Buy, watch.Buy),
+        ];
+
+        List<TmdbProviderGroup> groups = [];
+        foreach ((WatchOfferKind kind, List<TmdbProvider>? providers) in categories)
+        {
+            List<TmdbProvider> ordered = providers?
+                .Where(p => !string.IsNullOrWhiteSpace(p.ProviderName))
+                .OrderBy(p => p.DisplayPriority)
+                .DistinctBy(p => p.ProviderId > 0 ? $"id:{p.ProviderId}" : $"name:{p.ProviderName!.Trim()}", StringComparer.OrdinalIgnoreCase)
+                .ToList() ?? [];
+            if (ordered.Count > 0)
+            {
+                groups.Add(new(kind, ordered));
+            }
+        }
+
+        return groups;
+    }
 
     private static List<TmdbProvider>? Union(List<TmdbProvider>? a, List<TmdbProvider>? b) =>
         a is null ? b : b is null ? a : [.. a, .. b];

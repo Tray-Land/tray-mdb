@@ -6,6 +6,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Automation;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media.Imaging;
+using Microsoft.Windows.ApplicationModel.Resources;
 using TrayMDB.Services;
 using TrayMDB.Tmdb;
 using Launcher = Windows.System.Launcher;
@@ -29,6 +30,7 @@ public sealed partial class FlyoutPage : Page, IDisposable
     private const int MaxCrew = 8;
     private const int MaxKnownFor = 12;
     private const int MaxHistory = 20;
+    private static readonly Lazy<ResourceLoader> s_resources = new(() => new ResourceLoader());
 
     private ForegroundPoller _trendingPoller;
     private readonly DispatcherQueueTimer _searchTimer;
@@ -66,6 +68,8 @@ public sealed partial class FlyoutPage : Page, IDisposable
     public static Visibility VisibleIf(string? text) => string.IsNullOrWhiteSpace(text) ? Visibility.Collapsed : Visibility.Visible;
 
     public static string JoinParts(string? a, string? b) => TmdbFormat.JoinParts(a, b);
+
+    public static string WatchGroupLabel(WatchOfferKind kind) => s_resources.Value.GetString($"Watch{kind}");
 
     /// <summary>Segoe Fluent Icons: Contact for a person, Video for a title.</summary>
     public static string PlaceholderGlyph(bool isPerson) => isPerson ? "" : "";
@@ -117,6 +121,10 @@ public sealed partial class FlyoutPage : Page, IDisposable
         }
 
         FocusCurrentView();
+        if (IsShowingDetails && WatchExpander.IsExpanded)
+        {
+            ShowWatchProviders();
+        }
     }
 
     /// <summary>The flyout hid: stop the poller and abandon requests in flight.</summary>
@@ -126,6 +134,7 @@ public sealed partial class FlyoutPage : Page, IDisposable
         _searchTimer.Stop();
         _searchCts?.Cancel();
         _detailsCts?.Cancel();
+        WatchGroupsRepeater.ItemsSource = null;
     }
 
     /// <summary>
@@ -552,7 +561,9 @@ public sealed partial class FlyoutPage : Page, IDisposable
         KnownForRepeater.ItemsSource = null;
         KnownForSection.Visibility = Visibility.Collapsed;
         LinksPanel.Visibility = Visibility.Collapsed;
-        WatchAttribution.Visibility = Visibility.Collapsed;
+        WatchExpander.IsExpanded = false;
+        WatchExpander.Visibility = Visibility.Collapsed;
+        WatchGroupsRepeater.ItemsSource = null;
         ShowLibraryFlags();
     }
 
@@ -572,7 +583,7 @@ public sealed partial class FlyoutPage : Page, IDisposable
 
         string watch = TmdbFormat.WatchSummary(details, region);
         SetText(DetailWatch, watch);
-        WatchAttribution.Visibility = VisibleIf(watch);
+        WatchExpander.Visibility = Visibility.Visible;
 
         Uri? backdrop = TmdbFormat.ImageUri(details.BackdropPath, "w780");
         SetImage(BackdropImage, backdrop, 376);
@@ -588,7 +599,6 @@ public sealed partial class FlyoutPage : Page, IDisposable
         CrewSection.Visibility = crew.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
 
         TrailerButton.Visibility = TmdbFormat.TrailerUri(details) is null ? Visibility.Collapsed : Visibility.Visible;
-        WatchButton.Visibility = TmdbFormat.WatchUri(details, region) is null ? Visibility.Collapsed : Visibility.Visible;
         ImdbButton.Visibility = TmdbFormat.ImdbUri(details.ImdbId) is null ? Visibility.Collapsed : Visibility.Visible;
         LinksPanel.Visibility = Visibility.Visible;
     }
@@ -611,7 +621,7 @@ public sealed partial class FlyoutPage : Page, IDisposable
         SetText(DetailOverview, string.IsNullOrWhiteSpace(person.Biography) ? "No biography yet." : person.Biography);
         SetText(DetailCredit, null);
         SetText(DetailWatch, null);
-        WatchAttribution.Visibility = Visibility.Collapsed;
+        WatchExpander.Visibility = Visibility.Collapsed;
         BackdropBorder.Visibility = Visibility.Collapsed;
         SetImage(PosterImage, TmdbFormat.ImageUri(person.ProfilePath, "w185"), 92);
 
@@ -620,7 +630,6 @@ public sealed partial class FlyoutPage : Page, IDisposable
         KnownForSection.Visibility = knownFor.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
 
         TrailerButton.Visibility = Visibility.Collapsed;
-        WatchButton.Visibility = Visibility.Collapsed;
         ImdbButton.Visibility = TmdbFormat.ImdbUri(person.ImdbId) is null ? Visibility.Collapsed : Visibility.Visible;
         LinksPanel.Visibility = ImdbButton.Visibility;
     }
@@ -656,6 +665,8 @@ public sealed partial class FlyoutPage : Page, IDisposable
         CastRepeater.ItemsSource = null;
         CrewRepeater.ItemsSource = null;
         KnownForRepeater.ItemsSource = null;
+        WatchExpander.IsExpanded = false;
+        WatchGroupsRepeater.ItemsSource = null;
         BackdropImage.Source = null;
         PosterImage.Source = null;
         if (_showingLibrary)
@@ -814,7 +825,37 @@ public sealed partial class FlyoutPage : Page, IDisposable
 
     private void TrailerButton_Click(object sender, RoutedEventArgs e) => Open(_details is null ? null : TmdbFormat.TrailerUri(_details));
 
-    private void WatchButton_Click(object sender, RoutedEventArgs e) => Open(_details is null ? null : TmdbFormat.WatchUri(_details, TmdbService.Region));
+    private void ShowWatchProviders()
+    {
+        if (_details is not { } details || WatchGroupsRepeater.ItemsSource is not null)
+        {
+            return;
+        }
+
+        string region = TmdbService.Region;
+        List<TmdbProviderGroup> groups = TmdbFormat.WatchGroups(details, region);
+        WatchRegionText.Text = string.Format(CultureInfo.CurrentCulture, s_resources.Value.GetString("WatchRegion"), region);
+        WatchGroupsRepeater.ItemsSource = groups;
+        WatchEmptyText.Text = string.Format(CultureInfo.CurrentCulture, s_resources.Value.GetString("WatchEmpty"), region);
+        WatchEmptyText.Visibility = groups.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    private void WatchExpander_Expanding(Expander sender, ExpanderExpandingEventArgs args) => ShowWatchProviders();
+
+    private void DetailScroller_AnchorRequested(ScrollViewer sender, AnchorRequestedEventArgs args)
+    {
+        if (!IsShowingDetails || WatchExpander.Visibility != Visibility.Visible)
+        {
+            return;
+        }
+
+        double headerTop = WatchExpander.TransformToVisual(sender).TransformPoint(default).Y;
+        if (headerTop >= 0 && headerTop < sender.ViewportHeight)
+        {
+            // Anchor the unchanged top edge, not provider rows inserted below it.
+            args.Anchor = WatchExpander;
+        }
+    }
 
     private void ImdbButton_Click(object sender, RoutedEventArgs e) => Open(TmdbFormat.ImdbUri(_person?.ImdbId ?? _details?.ImdbId));
 

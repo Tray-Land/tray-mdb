@@ -116,6 +116,37 @@ public class TmdbClientTests
     }
 
     [Theory]
+    [InlineData(MediaKind.Movie, "movie")]
+    [InlineData(MediaKind.Tv, "tv")]
+    public async Task GetDetailsAsync_WatchProviders_ReadsNamesLogosAndEveryOfferType(MediaKind kind, string segment)
+    {
+        FakeHandler handler = new(HttpStatusCode.OK, """
+            {"id":1,"watch/providers":{"results":{
+              "US":{"flatrate":[{"provider_id":8,"provider_name":"Netflix","logo_path":"/netflix.jpg","display_priority":1}],
+                    "free":[{"provider_id":10,"provider_name":"Free service"}],
+                    "ads":[{"provider_id":11,"provider_name":"Ad service"}],
+                    "rent":[{"provider_id":2,"provider_name":"Apple TV","logo_path":"/apple.jpg"}],
+                    "buy":[{"provider_id":2,"provider_name":"Apple TV","logo_path":"/apple.jpg"}]},
+              "GB":{"flatrate":[{"provider_id":9,"provider_name":"Other service"}]}
+            }}}
+            """);
+        TmdbClient client = new(new HttpClient(handler), Jwt);
+
+        TmdbDetails details = await client.GetDetailsAsync(kind, 1, "en-US", CancellationToken.None);
+        List<TmdbProviderGroup> groups = TmdbFormat.WatchGroups(details, "US");
+
+        Assert.Contains($"{segment}/1?append_to_response=", handler.Request!.RequestUri!.OriginalString);
+        Assert.Contains("watch/providers", handler.Request.RequestUri.OriginalString);
+        Assert.Equal(5, groups.Count);
+        TmdbProvider netflix = Assert.Single(groups[0].Providers);
+        Assert.Equal(8, netflix.ProviderId);
+        Assert.Equal("Netflix", netflix.ProviderName);
+        Assert.Equal(1, netflix.DisplayPriority);
+        Assert.Equal("https://image.tmdb.org/t/p/w92/netflix.jpg", netflix.LogoUri?.AbsoluteUri);
+        Assert.Equal("Other service", Assert.Single(TmdbFormat.WatchGroups(details, "GB")).Providers[0].ProviderName);
+    }
+
+    [Theory]
     [InlineData(Jwt, true)]
     [InlineData("0123456789abcdef0123456789abcdef", false)]
     public void RecognizesCredentialKinds(string credential, bool bearer) => Assert.Equal(bearer, TmdbClient.IsBearerToken(credential));

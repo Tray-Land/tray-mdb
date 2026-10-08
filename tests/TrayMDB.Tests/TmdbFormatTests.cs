@@ -138,6 +138,103 @@ public class TmdbFormatTests
     }
 
     [Fact]
+    public void WatchGroups_AllCategories_KeepsEveryOfferTypeAndProvider()
+    {
+        TmdbDetails details = new()
+        {
+            WatchProviders = new()
+            {
+                Results = new()
+                {
+                    ["US"] = new()
+                    {
+                        Flatrate = Enumerable.Range(1, 5).Select(i => new TmdbProvider { ProviderId = i, ProviderName = $"Stream {i}" }).ToList(),
+                        Free = [new() { ProviderName = "Free service" }],
+                        Ads = [new() { ProviderName = "Ad service" }],
+                        Rent = [new() { ProviderId = 10, ProviderName = "Store" }],
+                        Buy = [new() { ProviderId = 10, ProviderName = "Store" }],
+                    },
+                    ["GB"] = new() { Flatrate = [new() { ProviderName = "UK service" }] },
+                },
+            },
+        };
+
+        List<TmdbProviderGroup> groups = TmdbFormat.WatchGroups(details, "us");
+
+        Assert.Equal([WatchOfferKind.Subscription, WatchOfferKind.Free, WatchOfferKind.Ads, WatchOfferKind.Rent, WatchOfferKind.Buy], groups.Select(g => g.Kind));
+        Assert.Equal(5, groups[0].Providers.Count);
+        Assert.Equal("Store", Assert.Single(groups[3].Providers).ProviderName);
+        Assert.Equal("Store", Assert.Single(groups[4].Providers).ProviderName);
+        Assert.DoesNotContain(groups.SelectMany(g => g.Providers), p => p.ProviderName == "UK service");
+    }
+
+    [Fact]
+    public void WatchGroups_DuplicateAndUnnamedProviders_SortsAndFiltersWithinEachCategory()
+    {
+        TmdbDetails details = new()
+        {
+            WatchProviders = new()
+            {
+                Results = new()
+                {
+                    ["US"] = new()
+                    {
+                        Flatrate =
+                        [
+                            new() { ProviderId = 2, ProviderName = "Second", DisplayPriority = 20 },
+                            new() { ProviderId = 1, ProviderName = "First", DisplayPriority = 5 },
+                            new() { ProviderId = 1, ProviderName = "Duplicate", DisplayPriority = 10 },
+                            new() { ProviderName = "Legacy", DisplayPriority = 30 },
+                            new() { ProviderName = " legacy ", DisplayPriority = 40 },
+                            new() { ProviderId = 3, ProviderName = "First", DisplayPriority = 50 },
+                            new() { ProviderName = " " },
+                            new(),
+                        ],
+                        Free = [],
+                        Buy = [new() { ProviderName = "" }],
+                    },
+                },
+            },
+        };
+
+        TmdbProviderGroup group = Assert.Single(TmdbFormat.WatchGroups(details, "US"));
+
+        Assert.Equal(WatchOfferKind.Subscription, group.Kind);
+        Assert.Equal(["First", "Second", "Legacy", "First"], group.Providers.Select(p => p.ProviderName));
+    }
+
+    [Fact]
+    public void WatchGroups_MissingRegionOrData_ReturnsNoGroupsWithoutAnotherCountryFallback()
+    {
+        TmdbDetails details = new()
+        {
+            WatchProviders = new()
+            {
+                Results = new()
+                {
+                    ["US"] = new() { Flatrate = [new() { ProviderName = "US only" }] },
+                    ["GB"] = new() { Link = "https://www.themoviedb.org/movie/1/watch?locale=GB" },
+                },
+            },
+        };
+
+        Assert.Empty(TmdbFormat.WatchGroups(details, "DE"));
+        Assert.Empty(TmdbFormat.WatchGroups(details, "GB"));
+        Assert.Empty(TmdbFormat.WatchGroups(new TmdbDetails(), "US"));
+    }
+
+    [Theory]
+    [InlineData("/provider.jpg", "https://image.tmdb.org/t/p/w92/provider.jpg")]
+    [InlineData(null, null)]
+    [InlineData("", null)]
+    public void LogoUri_WithOrWithoutLogo_UsesSmallTmdbImage(string? path, string? expected)
+    {
+        TmdbProvider provider = new() { LogoPath = path };
+
+        Assert.Equal(expected, provider.LogoUri?.AbsoluteUri);
+    }
+
+    [Fact]
     public void PersonMetaShowsAgeOrLifespan()
     {
         CultureInfo us = CultureInfo.GetCultureInfo("en-US");
