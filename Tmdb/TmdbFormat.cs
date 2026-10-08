@@ -44,6 +44,13 @@ public static class TmdbFormat
         return h == 0 ? $"{m}m" : m == 0 ? $"{h}h" : $"{h}h {m}m";
     }
 
+    /// <summary>Random length labels stay in minutes through 90, then use hours and remaining minutes.</summary>
+    public static (int Hours, int Minutes) RandomLengthParts(int minutes)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(minutes);
+        return minutes <= 90 ? (0, minutes) : (minutes / 60, minutes % 60);
+    }
+
     /// <summary>"7.8" out of 10, or empty when nobody has voted (TMDB reports 0 then).</summary>
     public static string Rating(double average, int count) =>
         count > 0 && average > 0 ? average.ToString("0.0", CultureInfo.CurrentCulture) : string.Empty;

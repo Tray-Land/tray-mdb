@@ -44,4 +44,73 @@
   <data name="WatchAttribution.Text" xml:space="preserve">
     <value>Where-to-watch data by JustWatch.</value>
   </data>
+  <data name="RandomEntry.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Random pick</value></data>
+  <data name="RandomEntry.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Random pick</value></data>
+  <data name="RandomBack.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Back to search</value></data>
+  <data name="RandomBack.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve"><value>Back to search</value></data>
+  <data name="RandomTitle.Text" xml:space="preserve"><value>Random</value></data>
+  <data name="RandomContentTypes.Text" xml:space="preserve"><value>Content types</value></data>
+  <data name="RandomMovie.Content" xml:space="preserve"><value>Movie</value></data>
+  <data name="RandomTv.Content" xml:space="preserve"><value>TV show</value></data>
+  <data name="RandomMovie.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Include movies</value></data>
+  <data name="RandomTv.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Include TV shows</value></data>
+  <data name="RandomGenre.Header" xml:space="preserve"><value>Genres</value></data>
+  <data name="RandomGenre.PlaceholderText" xml:space="preserve"><value>Type to add genres</value></data>
+  <data name="RandomGenre.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Genres, select any number</value></data>
+  <data name="RandomProvider.Header" xml:space="preserve"><value>Streaming services</value></data>
+  <data name="RandomProvider.PlaceholderText" xml:space="preserve"><value>Type to add services</value></data>
+  <data name="RandomProvider.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Streaming services, select any number</value></data>
+  <data name="RandomLengthLabel.Text" xml:space="preserve"><value>Length</value></data>
+  <data name="RandomLength.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Length range in minutes</value></data>
+  <data name="RandomLength.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.HelpText" xml:space="preserve"><value>Adjust either handle in 15-minute steps with the arrow keys. The far-right position means no upper limit. TV length is per episode.</value></data>
+  <data name="RandomAnyLength" xml:space="preserve"><value>Any length</value></data>
+  <data name="RandomLengthMinutes" xml:space="preserve"><value>{0} min</value></data>
+  <data name="RandomLengthHours" xml:space="preserve"><value>{0} hrs</value></data>
+  <data name="RandomLengthHourMinutes" xml:space="preserve"><value>{0} hr {1} min</value></data>
+  <data name="RandomLengthHoursMinutes" xml:space="preserve"><value>{0} hrs {1} min</value></data>
+  <data name="RandomLengthUpTo" xml:space="preserve"><value>Up to {0}</value></data>
+  <data name="RandomLengthAtLeast" xml:space="preserve"><value>{0}+</value></data>
+  <data name="RandomLengthBetweenMinutes" xml:space="preserve"><value>{0}-{1} min</value></data>
+  <data name="RandomLengthBetween" xml:space="preserve"><value>{0} - {1}</value></data>
+  <data name="RandomLengthMinimumName" xml:space="preserve"><value>Minimum length: {0}</value></data>
+  <data name="RandomLengthMaximumName" xml:space="preserve"><value>Maximum length: {0}</value></data>
+  <data name="RandomLengthNoMinimum" xml:space="preserve"><value>Minimum length: unrestricted</value></data>
+  <data name="RandomLengthNoMaximum" xml:space="preserve"><value>Maximum length: no upper limit</value></data>
+  <data name="RandomYearLabel.Text" xml:space="preserve"><value>Year</value></data>
+  <data name="RandomYear.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Release year range</value></data>
+  <data name="RandomYear.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.HelpText" xml:space="preserve"><value>Adjust either handle in one-year steps with the arrow keys. Movies use their release year; TV shows use their first-air year. The full range means any year.</value></data>
+  <data name="RandomAnyYear" xml:space="preserve"><value>Any year</value></data>
+  <data name="RandomYearBetween" xml:space="preserve"><value>{0}-{1}</value></data>
+  <data name="RandomYearMinimumName" xml:space="preserve"><value>Earliest release year: {0}</value></data>
+  <data name="RandomYearMaximumName" xml:space="preserve"><value>Latest release year: {0}</value></data>
+  <data name="RandomWatchList.Header" xml:space="preserve"><value>Want to watch</value></data>
+  <data name="RandomWatchList.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Want-to-watch list</value></data>
+  <data name="RandomAnyList.Content" xml:space="preserve"><value>Either</value></data>
+  <data name="RandomOnlyList.Content" xml:space="preserve"><value>On my list</value></data>
+  <data name="RandomExcludeList.Content" xml:space="preserve"><value>Not on my list</value></data>
+  <data name="RandomRating.Header" xml:space="preserve"><value>Minimum rating</value></data>
+  <data name="RandomRating.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Minimum TMDB rating</value></data>
+  <data name="RandomAnyRating.Content" xml:space="preserve"><value>Any rating</value></data>
+  <data name="RandomRating6.Content" xml:space="preserve"><value>6 / 10</value></data>
+  <data name="RandomRating7.Content" xml:space="preserve"><value>7 / 10</value></data>
+  <data name="RandomRating8.Content" xml:space="preserve"><value>8 / 10</value></data>
+  <data name="RandomExcludeSeen.Content" xml:space="preserve"><value>Exclude seen</value></data>
+  <data name="RandomExcludeSeen.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Exclude titles I have seen</value></data>
+  <data name="RandomLengthHint.Text" xml:space="preserve"><value>TV length is per episode. The slider's right edge means no upper limit. Streaming excludes rentals and purchases.</value></data>
+  <data name="RandomPick.Content" xml:space="preserve"><value>Pick something</value></data>
+  <data name="RandomPick.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve"><value>Pick something to watch</value></data>
+  <data name="RandomOpenDetails.Text" xml:space="preserve"><value>Open details</value></data>
+  <data name="RandomRegion" xml:space="preserve"><value>Streaming availability in {0}. Data by JustWatch.</value></data>
+  <data name="RandomChipsHint.Text" xml:space="preserve"><value>Choose suggestions or press Enter to add chips. Picks match any selected service and any selected genre. No chips means any.</value></data>
+  <data name="RandomInvalidToken" xml:space="preserve"><value>Choose a matching suggestion. Only listed services and genres can be added.</value></data>
+  <data name="RandomDuplicateToken" xml:space="preserve"><value>That filter is already selected.</value></data>
+  <data name="RandomUnfinishedToken" xml:space="preserve"><value>Choose a suggestion or clear unfinished filter text before picking.</value></data>
+  <data name="RandomChooseContent" xml:space="preserve"><value>Select Movie, TV show, or both.</value></data>
+  <data name="RandomIncompatibleChips" xml:space="preserve"><value>The selected services or genres do not apply to these content types. Change the chips or include another content type.</value></data>
+  <data name="RandomResultName" xml:space="preserve"><value>Open details for {0}</value></data>
+  <data name="RandomMissingKey" xml:space="preserve"><value>This build has no TMDB API key. Add TmdbApiKey to OAuth.resw and rebuild.</value></data>
+  <data name="RandomAuthError" xml:space="preserve"><value>TMDB did not accept the API key. Check TmdbApiKey in OAuth.resw.</value></data>
+  <data name="RandomNetworkError" xml:space="preserve"><value>Could not load data from TMDB. Check your connection and try again.</value></data>
+  <data name="RandomNoWatchListMatch" xml:space="preserve"><value>No titles on your want-to-watch list match these filters. Add titles to your list or loosen the filters.</value></data>
+  <data name="RandomNoSampleMatch" xml:space="preserve"><value>No match found in this random sample. Try another pick or loosen the filters.</value></data>
 </root>

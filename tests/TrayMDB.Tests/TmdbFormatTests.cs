@@ -22,6 +22,23 @@ public class TmdbFormatTests
     public void Runtime(int? minutes, string expected) => Assert.Equal(expected, TmdbFormat.Runtime(minutes));
 
     [Theory]
+    [InlineData(0, 0, 0)]
+    [InlineData(15, 0, 15)]
+    [InlineData(60, 0, 60)]
+    [InlineData(90, 0, 90)]
+    [InlineData(91, 1, 31)]
+    [InlineData(105, 1, 45)]
+    [InlineData(120, 2, 0)]
+    [InlineData(135, 2, 15)]
+    [InlineData(300, 5, 0)]
+    public void RandomLengthParts_MinutesAndHours_UsesHoursOnlyAfterNinetyMinutes(int totalMinutes, int hours, int minutes) =>
+        Assert.Equal((hours, minutes), TmdbFormat.RandomLengthParts(totalMinutes));
+
+    [Fact]
+    public void RandomLengthParts_NegativeMinutes_Throws() =>
+        Assert.Throws<ArgumentOutOfRangeException>(() => TmdbFormat.RandomLengthParts(-1));
+
+    [Theory]
     [InlineData("2019-01-01", "2023-06-01", false, "2019–2023")]
     [InlineData("2019-01-01", "2024-06-01", true, "2019–")]
     [InlineData("2019-01-01", "2019-12-01", false, "2019")]

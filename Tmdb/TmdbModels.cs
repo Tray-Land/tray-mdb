@@ -15,6 +15,8 @@ public sealed class TmdbPage<T>
     public List<T> Results { get; set; } = [];
 
     public int TotalResults { get; set; }
+
+    public int TotalPages { get; set; }
 }
 
 /// <summary>
@@ -107,6 +109,11 @@ public sealed class TmdbNamed
 
     /// <summary>Set on a show's <c>created_by</c> people; null for genres and networks.</summary>
     public string? ProfilePath { get; set; }
+}
+
+public sealed class TmdbGenres
+{
+    public List<TmdbNamed> Genres { get; set; } = [];
 }
 
 public sealed class TmdbCredits
@@ -234,6 +241,11 @@ public sealed class TmdbWatchProviders
     public Dictionary<string, TmdbWatchRegion> Results { get; set; } = [];
 }
 
+public sealed class TmdbEpisode
+{
+    public int? Runtime { get; set; }
+}
+
 /// <summary>
 /// <c>/movie/{id}</c> or <c>/tv/{id}</c> with credits, videos, ratings, external IDs, and watch
 /// providers appended. The two shapes share most fields; the rest are simply null for the other kind.
@@ -270,6 +282,8 @@ public sealed class TmdbDetails
     public int? NumberOfEpisodes { get; set; }
 
     public List<int>? EpisodeRunTime { get; set; }
+
+    public TmdbEpisode? LastEpisodeToAir { get; set; }
 
     public List<TmdbNamed>? CreatedBy { get; set; }
 
@@ -354,4 +368,6 @@ public sealed class TmdbError
 [JsonSerializable(typeof(TmdbDetails))]
 [JsonSerializable(typeof(TmdbPerson))]
 [JsonSerializable(typeof(TmdbError))]
+[JsonSerializable(typeof(TmdbGenres))]
+[JsonSerializable(typeof(TmdbResults<TmdbProvider>))]
 internal sealed partial class TmdbJsonContext : JsonSerializerContext;

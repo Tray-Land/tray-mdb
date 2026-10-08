@@ -48,6 +48,8 @@ public sealed partial class TrayFlyoutWindow : WindowEx
     private readonly HWND _hwnd;
     private readonly FlyoutPage _page = new();
     private SettingsPage? _settingsPage;
+    private RandomPage? _randomPage;
+    private bool _returnToRandom;
     private readonly ShellBackdrop _backdrop = new();
     private readonly UISettings _uiSettings = new();
     private readonly DispatcherQueueTimer _hideTimer;
@@ -80,6 +82,12 @@ public sealed partial class TrayFlyoutWindow : WindowEx
         InitializeComponent();
         _hwnd = (HWND)WindowNative.GetWindowHandle(this);
         PageHost.Content = _page;
+        _page.BackRequested = () => GoBack();
+        _page.HomeRequested = () =>
+        {
+            _returnToRandom = false;
+            _page.ReturnToSearch();
+        };
 
         SystemBackdrop = _backdrop;
         ApplyShellTheme();
@@ -132,6 +140,8 @@ public sealed partial class TrayFlyoutWindow : WindowEx
 
     public void ShowSettingsPage()
     {
+        _randomPage?.OnHidden();
+        _returnToRandom = false;
         _settingsPage ??= new SettingsPage(ShowMainPage);
         _settingsPage.OnShown();
         _page.OnHidden(); // No fetching behind the settings page.
@@ -140,6 +150,8 @@ public sealed partial class TrayFlyoutWindow : WindowEx
 
     public void ShowMainPage()
     {
+        _randomPage?.OnHidden();
+        _returnToRandom = false;
         if (ReferenceEquals(PageHost.Content, _page))
         {
             return;
@@ -154,13 +166,37 @@ public sealed partial class TrayFlyoutWindow : WindowEx
 
     private bool GoBack()
     {
-        if (IsShowingSettings)
+        if (IsShowingSettings || PageHost.Content is RandomPage)
         {
             ShowMainPage();
             return true;
         }
 
-        return _page.TryGoBack();
+        bool handled = _page.TryGoBack();
+        if (_returnToRandom && !_page.IsShowingDetails)
+        {
+            ShowRandomPage();
+            return true;
+        }
+
+        return handled;
+    }
+
+    public void ShowRandomPage()
+    {
+        _randomPage ??= new RandomPage(ShowMainPage, pick =>
+        {
+            ShowMainPage();
+            _returnToRandom = true;
+            _page.OpenRandomPick(pick);
+        });
+        _page.OnHidden();
+        _returnToRandom = false;
+        PageHost.Content = _randomPage;
+        if (_isPopupVisible)
+        {
+            _randomPage.OnShown();
+        }
     }
 
     public void ShowPopup()
@@ -183,7 +219,11 @@ public sealed partial class TrayFlyoutWindow : WindowEx
         Activate();
         PInvoke.SetForegroundWindow(_hwnd);
 
-        if (!IsShowingSettings)
+        if (PageHost.Content is RandomPage)
+        {
+            _randomPage?.OnShown();
+        }
+        else if (!IsShowingSettings)
         {
             _page.OnShown();
         }
@@ -202,6 +242,7 @@ public sealed partial class TrayFlyoutWindow : WindowEx
         _isPopupVisible = false;
         _lastDismissedAtUtc = DateTime.UtcNow;
         _page.OnHidden();
+        _randomPage?.OnHidden();
         PlayHideAnimation();
 
         _closeTimer.Stop();
@@ -227,6 +268,8 @@ public sealed partial class TrayFlyoutWindow : WindowEx
         _page.Dispose();
         PageHost.Content = null;
         _settingsPage = null;
+        _randomPage?.Dispose();
+        _randomPage = null;
 
         _uiSettings.ColorValuesChanged -= OnColorValuesChanged;
         Activated -= OnWindowActivated;

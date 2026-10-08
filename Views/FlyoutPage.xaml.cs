@@ -65,6 +65,27 @@ public sealed partial class FlyoutPage : Page, IDisposable
 
     public bool IsShowingDetails => DetailView.Visibility == Visibility.Visible;
 
+    internal Action? BackRequested { get; set; }
+
+    internal Action? HomeRequested { get; set; }
+
+    internal void ReturnToSearch() => ShowSearchView();
+
+    internal void OpenRandomPick(RandomPick pick)
+    {
+        _history.Clear();
+        if (_detailsCache.Count >= MaxCachedDetails)
+        {
+            _detailsCache.Clear();
+        }
+
+        _detailsCache[(pick.Details.Kind, pick.Item.Id)] = pick.Details;
+        OpenDetails(pick.Item, addToHistory: false);
+    }
+
+    private void RandomButton_Click(object sender, RoutedEventArgs e) =>
+        App.Current.ShowRandom();
+
     public static Visibility VisibleIf(string? text) => string.IsNullOrWhiteSpace(text) ? Visibility.Collapsed : Visibility.Visible;
 
     public static string JoinParts(string? a, string? b) => TmdbFormat.JoinParts(a, b);
@@ -867,15 +888,15 @@ public sealed partial class FlyoutPage : Page, IDisposable
         }
     }
 
-    private void BackButton_Click(object sender, RoutedEventArgs e) => TryGoBack();
+    private void BackButton_Click(object sender, RoutedEventArgs e) => BackRequested?.Invoke();
 
     // Home skips the whole trail; the search box and results are kept as they were.
-    private void HomeButton_Click(object sender, RoutedEventArgs e) => ShowSearchView();
+    private void HomeButton_Click(object sender, RoutedEventArgs e) => HomeRequested?.Invoke();
 
     private void Home_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
     {
         args.Handled = true;
-        ShowSearchView();
+        HomeRequested?.Invoke();
     }
 
     private void SettingsButton_Click(object sender, RoutedEventArgs e) => App.Current.ShowSettings();

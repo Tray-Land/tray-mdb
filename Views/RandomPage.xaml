@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="TrayMDB.Views.RandomPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:CommunityToolkit.WinUI.Controls"
+    Background="Transparent">
+    <Grid Padding="16,12" RowSpacing="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <StackPanel Orientation="Horizontal" Spacing="8">
+            <Button
+                x:Name="BackButton"
+                x:Uid="RandomBack"
+                AutomationProperties.AutomationId="RandomBack"
+                Click="BackButton_Click"
+                Style="{StaticResource FlyoutIconButtonStyle}">
+                <FontIcon FontSize="14" Glyph="&#xE72B;" />
+            </Button>
+            <TextBlock
+                x:Uid="RandomTitle"
+                VerticalAlignment="Center"
+                AutomationProperties.HeadingLevel="Level1"
+                Style="{StaticResource SubtitleTextBlockStyle}" />
+        </StackPanel>
+        <ScrollViewer
+            x:Name="BodyScroller"
+            Grid.Row="1"
+            Padding="0,0,12,0"
+            HorizontalScrollBarVisibility="Disabled"
+            VerticalScrollBarVisibility="Auto">
+            <StackPanel Spacing="12">
+                <TextBlock
+                    x:Name="RegionText"
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                    Style="{StaticResource CaptionTextBlockStyle}"
+                    TextWrapping="Wrap" />
+                <Grid x:Name="FiltersPanel" ColumnSpacing="12" RowSpacing="12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <StackPanel Grid.ColumnSpan="2" Spacing="6">
+                        <TextBlock x:Uid="RandomContentTypes" />
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <ToggleButton
+                                x:Name="MovieToggle"
+                                x:Uid="RandomMovie"
+                                AutomationProperties.AutomationId="RandomMovie"
+                                Checked="ContentType_Changed"
+                                Unchecked="ContentType_Changed"
+                                IsChecked="True" />
+                            <ToggleButton
+                                x:Name="TvToggle"
+                                x:Uid="RandomTv"
+                                AutomationProperties.AutomationId="RandomTv"
+                                Checked="ContentType_Changed"
+                                Unchecked="ContentType_Changed" />
+                        </StackPanel>
+                    </StackPanel>
+                    <controls:TokenizingTextBox
+                        x:Name="GenreBox"
+                        x:Uid="RandomGenre"
+                        Grid.Row="2"
+                        Grid.ColumnSpan="2"
+                        AutomationProperties.AutomationId="RandomGenre"
+                        HorizontalAlignment="Stretch"
+                        MaxHeight="160"
+                        TokenDelimiter=""
+                        TextChanged="GenreBox_TextChanged"
+                        TokenItemAdding="GenreBox_TokenItemAdding"
+                        TokenItemAdded="Token_Changed"
+                        TokenItemRemoved="Token_Changed" />
+                    <controls:TokenizingTextBox
+                        x:Name="ProviderBox"
+                        x:Uid="RandomProvider"
+                        Grid.Row="1"
+                        Grid.ColumnSpan="2"
+                        AutomationProperties.AutomationId="RandomProvider"
+                        HorizontalAlignment="Stretch"
+                        MaxHeight="160"
+                        TokenDelimiter=""
+                        TextChanged="ProviderBox_TextChanged"
+                        TokenItemAdding="ProviderBox_TokenItemAdding"
+                        TokenItemAdded="Token_Changed"
+                        TokenItemRemoved="Token_Changed" />
+                    <StackPanel Grid.Row="3" Grid.ColumnSpan="2" Spacing="4">
+                        <Grid ColumnSpacing="12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Uid="RandomLengthLabel" />
+                            <TextBlock
+                                x:Name="LengthValueText"
+                                Grid.Column="1"
+                                AutomationProperties.AutomationId="RandomLengthValue"
+                                HorizontalAlignment="Right"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                TextWrapping="Wrap" />
+                        </Grid>
+                        <controls:RangeSelector
+                            x:Name="LengthRange"
+                            x:Uid="RandomLength"
+                            AutomationProperties.AutomationId="RandomLength"
+                            HorizontalAlignment="Stretch"
+                            Loaded="LengthRange_Loaded"
+                            Minimum="15"
+                            Maximum="300"
+                            RangeStart="15"
+                            RangeEnd="300"
+                            StepFrequency="15" />
+                        <Grid>
+                            <TextBlock
+                                x:Name="LengthMinimumText"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Style="{StaticResource CaptionTextBlockStyle}" />
+                            <TextBlock
+                                x:Name="LengthMaximumText"
+                                HorizontalAlignment="Right"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Style="{StaticResource CaptionTextBlockStyle}" />
+                        </Grid>
+                    </StackPanel>
+                    <StackPanel Grid.Row="4" Grid.ColumnSpan="2" Spacing="4">
+                        <Grid ColumnSpacing="12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Uid="RandomYearLabel" />
+                            <TextBlock
+                                x:Name="YearValueText"
+                                Grid.Column="1"
+                                AutomationProperties.AutomationId="RandomYearValue"
+                                HorizontalAlignment="Right"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                TextWrapping="Wrap" />
+                        </Grid>
+                        <controls:RangeSelector
+                            x:Name="YearRange"
+                            x:Uid="RandomYear"
+                            AutomationProperties.AutomationId="RandomYear"
+                            HorizontalAlignment="Stretch"
+                            Loaded="YearRange_Loaded"
+                            Minimum="1900"
+                            Maximum="1901"
+                            RangeStart="1900"
+                            StepFrequency="1" />
+                        <Grid>
+                            <TextBlock
+                                x:Name="YearMinimumText"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Style="{StaticResource CaptionTextBlockStyle}" />
+                            <TextBlock
+                                x:Name="YearMaximumText"
+                                HorizontalAlignment="Right"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Style="{StaticResource CaptionTextBlockStyle}" />
+                        </Grid>
+                    </StackPanel>
+                    <ComboBox
+                        x:Name="WatchListBox"
+                        x:Uid="RandomWatchList"
+                        Grid.Row="5"
+                        AutomationProperties.AutomationId="RandomWatchList"
+                        HorizontalAlignment="Stretch"
+                        SelectedIndex="0"
+                        SelectionChanged="Filter_SelectionChanged">
+                        <ComboBoxItem x:Uid="RandomAnyList" />
+                        <ComboBoxItem x:Uid="RandomOnlyList" />
+                        <ComboBoxItem x:Uid="RandomExcludeList" />
+                    </ComboBox>
+                    <ComboBox
+                        x:Name="RatingBox"
+                        x:Uid="RandomRating"
+                        Grid.Row="5"
+                        Grid.Column="1"
+                        AutomationProperties.AutomationId="RandomRating"
+                        HorizontalAlignment="Stretch"
+                        SelectedIndex="0"
+                        SelectionChanged="Filter_SelectionChanged">
+                        <ComboBoxItem x:Uid="RandomAnyRating" />
+                        <ComboBoxItem x:Uid="RandomRating6" />
+                        <ComboBoxItem x:Uid="RandomRating7" />
+                        <ComboBoxItem x:Uid="RandomRating8" />
+                    </ComboBox>
+                    <CheckBox
+                        x:Name="ExcludeSeenBox"
+                        x:Uid="RandomExcludeSeen"
+                        Grid.Row="6"
+                        Grid.ColumnSpan="2"
+                        VerticalAlignment="Bottom"
+                        AutomationProperties.AutomationId="RandomExcludeSeen"
+                        Click="ExcludeSeenBox_Click"
+                        IsChecked="True" />
+                </Grid>
+                <TextBlock
+                    x:Uid="RandomChipsHint"
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                    Style="{StaticResource CaptionTextBlockStyle}"
+                    TextWrapping="Wrap" />
+                <TextBlock
+                    x:Uid="RandomLengthHint"
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                    Style="{StaticResource CaptionTextBlockStyle}"
+                    TextWrapping="Wrap" />
+                <InfoBar
+                    x:Name="StatusBar"
+                    IsClosable="False"
+                    IsOpen="False"
+                    Severity="Informational" />
+                <Button
+                    x:Name="ResultButton"
+                    AutomationProperties.AutomationId="RandomResult"
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Stretch"
+                    Click="ResultButton_Click"
+                    Visibility="Collapsed">
+                    <Grid ColumnSpacing="12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="64" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Image
+                            x:Name="Poster"
+                            Width="64"
+                            Height="96"
+                            AutomationProperties.AccessibilityView="Raw"
+                            Stretch="UniformToFill" />
+                        <StackPanel Grid.Column="1" Spacing="4">
+                            <TextBlock
+                                x:Name="ResultTitle"
+                                Style="{StaticResource BodyStrongTextBlockStyle}"
+                                TextWrapping="Wrap" />
+                            <TextBlock
+                                x:Name="ResultMeta"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Style="{StaticResource CaptionTextBlockStyle}"
+                                TextWrapping="Wrap" />
+                            <TextBlock
+                                x:Uid="RandomOpenDetails"
+                                Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                                Style="{StaticResource CaptionTextBlockStyle}"
+                                TextWrapping="Wrap" />
+                        </StackPanel>
+                    </Grid>
+                </Button>
+            </StackPanel>
+        </ScrollViewer>
+        <Grid Grid.Row="2" ColumnSpacing="12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <Button
+                x:Name="PickButton"
+                x:Uid="RandomPick"
+                AutomationProperties.AutomationId="RandomPick"
+                HorizontalAlignment="Stretch"
+                AccessKey="P"
+                Click="PickButton_Click"
+                Style="{StaticResource AccentButtonStyle}" />
+            <ProgressRing
+                x:Name="LoadingRing"
+                Grid.Column="1"
+                Width="24"
+                Height="24"
+                IsActive="False" />
+        </Grid>
+    </Grid>
+</Page>

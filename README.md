@@ -42,6 +42,19 @@ no tab to find, nothing running while the flyout is closed.
 - **My stuff.** Flag any movie or show as *Seen* or *Want to watch* and the library button swaps the
   search box for a filter over the titles you flagged. Marking something seen clears its
   want-to-watch flag; clearing both flags drops it entirely.
+- **Random picks.** The Random button opens a picker with streaming services, movie/TV, genres,
+  rough length, release year, want-to-watch inclusion/exclusion, minimum rating, and an exclude-seen option.
+  TV length means one episode. Services follow your Windows region and include subscription,
+  free, and ad-supported streaming, not rent or buy. Pick again to reroll, or open the result's
+  normal detail page; Back returns to your filters. Services and genres are searchable, removable
+  multi-select chips: a pick matches any selected service and any selected genre; an empty chip
+  field means no restriction. Movies and TV can both be included. Length uses a two-handle
+  range slider with 15-minute steps up to 300+ minutes; labels stay in minutes through 90,
+  then use hours and minutes. The far-right handle means no upper limit, and the full range
+  means any length. A second range slider selects years from 1900 to the current year in
+  one-year steps, using movie release dates and TV first-air dates. Its full range means
+  any year, including titles with an unknown year; a narrowed range requires a known date
+  within its inclusive bounds. Want-to-watch mode and minimum rating remain single constraints.
 - **Looks like the shell.** A borderless, rounded, light-dismissing popup anchored to the tray icon
   that slides and fades in, follows the taskbar's light/dark mode and accent tint, and never shows
   up in the taskbar or `Alt`+`Tab`.
@@ -88,6 +101,7 @@ shows a "no key" message instead of results.
 | Open it from anywhere | Launch Tray MDB again — the running instance opens its flyout |
 | Settings | Gear button in the header, or the tray context menu |
 | My stuff | The library button next to the gear |
+| Random | The Random pick button in the header |
 | Quit | Tray context menu → **Exit** (the only way out; closing the flyout does not exit) |
 
 ## Keyboard
@@ -146,6 +160,7 @@ Views/
   TrayFlyoutWindow      Borderless popup: positioning, slide/fade, light dismiss, shell theming
   FlyoutPage            Search, trending, details, person pages, back history, "My stuff"
   SettingsPage          A page inside the flyout, not a window
+  RandomPage            Filters, random picks, and links to the existing detail view
 Controls/ShellBackdrop  The taskbar-flyout-style backdrop
 Services/
   TmdbService           Which key, the shared HttpClient, language and region
@@ -164,6 +179,7 @@ Tmdb/                   Pure TMDB layer — no WinRT, so plain unit tests can re
   TmdbModels            Source-generated JSON models (trim-safe)
   TmdbFormat            Year, runtime, rating, provider, trailer, and image URL formatting
   Library               Seen / want-to-watch rules and persistence format
+  RandomPicker          Filter verification and randomized catalog/watchlist selection
 tests/TrayMDB.Tests     xUnit, net10.0, compiles Tmdb\*.cs straight in
 ```
 
@@ -185,6 +201,16 @@ pages are cached (20 entries) for the lifetime of the page.
 Where-to-watch rows are kept between expander toggles to avoid rebuilding the layout, and released
 when the flyout hides. While its header is visible, it anchors the detail scroll position as the
 section expands or collapses.
+Random requests are user-triggered and cancelled on hide or navigation away. Genre/service lists
+are cached for movies and TV while the flyout exists. Watchlist mode shuffles the
+entire eligible saved list; catalog mode samples up to five random pages from TMDB's accessible
+first 500 pages per selected content type and checks up to 30 candidates against their details.
+Genre IDs are mapped separately for movies and TV, including when the same genre name is shared.
+A sample with no match is
+reported as such, not as proof that no matching title exists.
+
+The Random page uses the Windows Community Toolkit's focused `TokenizingTextBox` package for
+multi-select chips and suggestions, and `RangeSelector` for the two-handle length and year sliders.
 
 ## Design rules
 

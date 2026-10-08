@@ -113,6 +113,17 @@ public partial class App : Application
         {
             flyout.ShowPopup();
         }
+
+    }
+
+    internal void ShowRandom()
+    {
+        TrayFlyoutWindow flyout = EnsureFlyout();
+        flyout.ShowRandomPage();
+        if (!flyout.IsPopupVisible)
+        {
+            flyout.ShowPopup();
+        }
     }
 
     private void InitializeTrayIcon()

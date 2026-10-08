@@ -58,6 +58,90 @@ public sealed class TmdbClient(HttpClient http, string credential)
     /// <summary>A v4 read access token is a JWT; a v3 API key is 32 hex characters.</summary>
     public static bool IsBearerToken(string credential) => credential.StartsWith("eyJ", StringComparison.Ordinal) && credential.Contains('.');
 
+    public async Task<List<TmdbNamed>> GetGenresAsync(MediaKind kind, string language, CancellationToken cancellationToken)
+    {
+        string path = $"genre/{TitleSegment(kind)}/list?language={Uri.EscapeDataString(language)}";
+        TmdbGenres response = await GetAsync(path, TmdbJsonContext.Default.TmdbGenres, cancellationToken);
+        return response.Genres.Where(g => g.Id > 0 && !string.IsNullOrWhiteSpace(g.Name)).ToList();
+    }
+
+    public async Task<List<TmdbProvider>> GetStreamingProvidersAsync(MediaKind kind, string language, string region, CancellationToken cancellationToken)
+    {
+        string path = $"watch/providers/{TitleSegment(kind)}?language={Uri.EscapeDataString(language)}&watch_region={Uri.EscapeDataString(region)}";
+        TmdbResults<TmdbProvider> response = await GetAsync(path, TmdbJsonContext.Default.TmdbResultsTmdbProvider, cancellationToken);
+        return response.Results
+            .Where(p => p.ProviderId > 0 && !string.IsNullOrWhiteSpace(p.ProviderName))
+            .DistinctBy(p => p.ProviderId)
+            .OrderBy(p => p.DisplayPriority)
+            .ThenBy(p => p.ProviderName)
+            .ToList();
+    }
+
+    public async Task<TmdbPage<TmdbSearchItem>> DiscoverAsync(RandomFilters filters, string language, string region, int page, CancellationToken cancellationToken)
+    {
+        filters.Validate();
+        ArgumentOutOfRangeException.ThrowIfLessThan(page, 1);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(page, 500);
+        string segment = TitleSegment(filters.Kind);
+        string path = $"discover/{segment}?include_adult=false&include_video=false&sort_by=popularity.desc&page={page}&language={Uri.EscapeDataString(language)}";
+        string dateField = filters.Kind == MediaKind.Movie ? "primary_release_date" : "first_air_date";
+        DateOnly today = DateOnly.FromDateTime(DateTime.UtcNow);
+        DateOnly upperDate = filters.MaxYear is { } maxYear ? new(maxYear, 12, 31) : today;
+        if (upperDate > today)
+        {
+            upperDate = today;
+        }
+
+        path += $"&{dateField}.lte={upperDate.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture)}";
+        if (filters.MinYear is { } minYear)
+        {
+            DateOnly lowerDate = new(minYear, 1, 1);
+            path += $"&{dateField}.gte={lowerDate.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture)}";
+        }
+        if (filters.ProviderIds is { Count: > 0 } providers)
+        {
+            string providerIds = Uri.EscapeDataString(string.Join("|", providers.Distinct()));
+            path += $"&watch_region={Uri.EscapeDataString(region)}&with_watch_providers={providerIds}&with_watch_monetization_types=flatrate%7Cfree%7Cads";
+        }
+
+        if (filters.GenreIds is { Count: > 0 } genres)
+        {
+            path += $"&with_genres={Uri.EscapeDataString(string.Join("|", genres.Distinct()))}";
+        }
+
+        if (filters.MinMinutes is { } min)
+        {
+            path += $"&with_runtime.gte={min}";
+        }
+
+        if (filters.MaxMinutes is { } max)
+        {
+            path += $"&with_runtime.lte={max}";
+        }
+
+        if (filters.MinRating > 0)
+        {
+            path += $"&vote_average.gte={filters.MinRating.ToString(System.Globalization.CultureInfo.InvariantCulture)}&vote_count.gte=1";
+        }
+
+        TmdbPage<TmdbSearchItem> result = await GetAsync(path, TmdbJsonContext.Default.TmdbPageTmdbSearchItem, cancellationToken);
+        // Discover responses omit media_type; multi-search and the detail view require it.
+        foreach (TmdbSearchItem item in result.Results)
+        {
+            item.MediaType = segment;
+        }
+
+        result.Results = Displayable(result.Results, includePeople: false).Where(i => i.Id > 0).ToList();
+        return result;
+    }
+
+    private static string TitleSegment(MediaKind kind) => kind switch
+    {
+        MediaKind.Movie => "movie",
+        MediaKind.Tv => "tv",
+        _ => throw new ArgumentException("Only movies and TV shows can be discovered.", nameof(kind)),
+    };
+
     private static List<TmdbSearchItem> Displayable(List<TmdbSearchItem> results, bool includePeople) =>
         results
             .Where(r => r.Kind is MediaKind.Movie or MediaKind.Tv || (includePeople && r.Kind == MediaKind.Person))
