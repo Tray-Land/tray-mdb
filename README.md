@@ -65,9 +65,9 @@ no tab to find, nothing running while the flyout is closed.
 
 ## Install
 
-Grab the `.msix` for your architecture (`x64` or `arm64`) from the
-[Releases](https://github.com/Tray-Land/tray-mdb/releases) page and double-click it. Packages are
-signed; Windows installs the Windows App Runtime dependency automatically if you do not have it.
+Download [TrayMDB.appinstaller](https://github.com/Tray-Land/tray-mdb/releases/latest/download/TrayMDB.appinstaller)
+and open it. Windows installs the right version for your PC (x64 or ARM64), pulls in the Windows App
+Runtime if needed, and keeps the app updated. Requires Windows 10 2004 or later, or Windows 11.
 
 After the first launch the flyout opens once to show you where the app lives. From then on, click
 the tray icon.
@@ -258,18 +258,21 @@ JSON round trip; `TmdbFormatTests` covers the formatting helpers. New decision l
 
 ## Releasing
 
-`build-msix-for-gh.ps1` publishes signed `x64` and `arm64` MSIX packages and opens a **draft**
-GitHub release:
+`build-msix-for-gh.ps1` builds a signed `x64` + `arm64` `.msixbundle` and an auto-updating
+`TrayMDB.appinstaller` feed, and opens a **draft** GitHub release:
 
 ```powershell
 .\build-msix-for-gh.ps1                    # verify, build, sign, draft a release
 .\build-msix-for-gh.ps1 -SkipRelease       # build and sign only
+.\build-msix-for-gh.ps1 -VerifyPublished   # after publishing the draft (keep its tag), check the feed
 ```
+
+Publish the draft without changing its tag; the feed addresses contain it.
 
 It refuses to run on a dirty or unpushed branch, or when the tag derived from the
 `Package.appxmanifest` `<Identity Version="...">` already exists — bump the manifest version first.
 Signing uses the maintainer's local `sign-msix` profile function, so no signing configuration is
-checked in, and the publish profiles under `Properties/PublishProfiles` are gitignored.
+checked in. The publish profiles under `Properties/PublishProfiles` are committed.
 
 ## Attribution and license
 
